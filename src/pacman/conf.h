@@ -40,6 +40,7 @@ typedef struct __config_repo_t {
 	int usage;
 	int siglevel;
 	int siglevel_mask;
+	char *pinnedpubkey;
 } config_repo_t;
 
 typedef struct __config_t {

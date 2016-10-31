@@ -327,6 +327,12 @@ static void curl_set_handle_opts(struct dload_payload *payload,
 		curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
 	}
 
+	if(payload->pinnedpubkey != NULL) {
+		_alpm_log(handle, ALPM_LOG_DEBUG,
+				"using curl pinnedpubkey: %s\n", payload->pinnedpubkey);
+		curl_easy_setopt(curl, CURLOPT_PINNEDPUBLICKEY, payload->pinnedpubkey);
+	}
+
 	if(!payload->allow_resume && !payload->force && payload->destfile_name &&
 			stat(payload->destfile_name, &st) == 0) {
 		/* start from scratch, but only download if our local is out of date. */
@@ -646,7 +652,7 @@ int _alpm_download(struct dload_payload *payload, const char *localpath,
 		RET_ERR(handle, ALPM_ERR_EXTERNAL_DOWNLOAD, -1);
 #endif
 	} else {
-		int ret = handle->fetchcb(payload->fileurl, localpath, payload->force);
+		int ret = handle->fetchcb(payload->fileurl, localpath, payload->force, payload->pinnedpubkey);
 		if(ret == -1 && !payload->errors_ok) {
 			RET_ERR(handle, ALPM_ERR_EXTERNAL_DOWNLOAD, -1);
 		}

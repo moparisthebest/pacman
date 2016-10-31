@@ -242,6 +242,8 @@ int SYMEXPORT alpm_db_update(int force, alpm_db_t *db)
 		payload.handle = handle;
 		payload.force = force;
 		payload.unlink_on_fail = 1;
+		
+		payload.pinnedpubkey = db->pinnedpubkey;
 
 		ret = _alpm_download(&payload, syncpath, NULL, &final_db_url);
 		_alpm_dload_payload_reset(&payload);
@@ -296,6 +298,8 @@ int SYMEXPORT alpm_db_update(int force, alpm_db_t *db)
 
 			/* set hard upper limit of 16KiB */
 			payload.max_size = 16 * 1024;
+
+			payload.pinnedpubkey = db->pinnedpubkey;
 
 			sig_ret = _alpm_download(&payload, syncpath, NULL, NULL);
 			/* errors_ok suppresses error messages, but not the return code */

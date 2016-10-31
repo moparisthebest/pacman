@@ -862,7 +862,7 @@ static int validate_deltas(alpm_handle_t *handle, alpm_list_t *deltas)
 }
 
 static struct dload_payload *build_payload(alpm_handle_t *handle,
-		const char *filename, size_t size, alpm_list_t *servers)
+		const char *filename, size_t size, alpm_list_t *servers, char *pinnedpubkey)
 {
 		struct dload_payload *payload;
 
@@ -870,6 +870,7 @@ static struct dload_payload *build_payload(alpm_handle_t *handle,
 		STRDUP(payload->remote_name, filename, FREE(payload); RET_ERR(handle, ALPM_ERR_MEMORY, NULL));
 		payload->max_size = size;
 		payload->servers = servers;
+		payload->pinnedpubkey = pinnedpubkey;
 		return payload;
 }
 
@@ -898,7 +899,7 @@ static int find_dl_candidates(alpm_db_t *repo, alpm_list_t **files, alpm_list_t 
 					alpm_delta_t *delta = dlts->data;
 					if(delta->download_size != 0) {
 						struct dload_payload *payload = build_payload(
-								handle, delta->delta, delta->delta_size, repo->servers);
+								handle, delta->delta, delta->delta_size, repo->servers, repo->pinnedpubkey);
 						ASSERT(payload, return -1);
 						*files = alpm_list_add(*files, payload);
 					}
@@ -909,7 +910,7 @@ static int find_dl_candidates(alpm_db_t *repo, alpm_list_t **files, alpm_list_t 
 			} else if(spkg->download_size != 0) {
 				struct dload_payload *payload;
 				ASSERT(spkg->filename != NULL, RET_ERR(handle, ALPM_ERR_PKG_INVALID_NAME, -1));
-				payload = build_payload(handle, spkg->filename, spkg->size, repo->servers);
+				payload = build_payload(handle, spkg->filename, spkg->size, repo->servers, repo->pinnedpubkey);
 				ASSERT(payload, return -1);
 				*files = alpm_list_add(*files, payload);
 			}

@@ -67,6 +67,7 @@ struct __alpm_db_t {
 	char *treename;
 	/* do not access directly, use _alpm_db_path(db) for lazy access */
 	char *_path;
+	char *pinnedpubkey;
 	alpm_pkghash_t *pkgcache;
 	alpm_list_t *grpcache;
 	alpm_list_t *servers;

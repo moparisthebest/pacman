@@ -126,7 +126,8 @@ Options
 	All instances of `%u` will be replaced with the download URL. If present,
 	instances of `%o` will be replaced with the local filename, plus a
 	``.part'' extension, which allows programs like wget to do file resumes
-	properly.
+	properly. If present, instances of `%p` will be replaced with the value of
+	the repo specific PinnedPubKey directive, or `` if that is not set.
 	+
 	This option is useful for users who experience problems with built-in
 	HTTP/FTP support, or need the more advanced proxy support that comes with
@@ -276,6 +277,15 @@ even be used for different architectures.
 Note that an enabled repository can be operated on explicitly, regardless of the Usage
 level set.
 
+*PinnedPubKey =* pinnedpubkey::
+	The string can be the file name of your pinned public key. The file format expected
+	is "PEM" or "DER".  The string can also be any number of base64 encoded sha256 
+	hashes preceded by "sha256//" and separated by ";"
++
+When negotiating a TLS or SSL connection, the server sends a certificate indicating
+its identity. A public key is extracted from this certificate and if it does not
+exactly match the public key provided to this option, pacman will abort the
+connection before sending or receiving any data.
 
 Package and Database Signature Checking[[SC]]
 ---------------------------------------------

@@ -750,11 +750,12 @@ typedef void (*alpm_cb_totaldl)(off_t total);
  * @param url the URL of the file to be downloaded
  * @param localpath the directory to which the file should be downloaded
  * @param force whether to force an update, even if the file is the same
+ * @param pinnedpubkey a pinned public key string
  * @return 0 on success, 1 if the file exists and is identical, -1 on
  * error.
  */
 typedef int (*alpm_cb_fetch)(const char *url, const char *localpath,
-		int force);
+		int force, const char *pinnedpubkey);
 
 /** Fetch a remote pkg.
  * @param handle the context handle
@@ -1036,6 +1037,13 @@ alpm_list_t *alpm_db_get_groupcache(alpm_db_t *db);
  * @return the list of packages matching all regular expressions on success, NULL on error
  */
 alpm_list_t *alpm_db_search(alpm_db_t *db, const alpm_list_t *needles);
+
+/** Sets the pinned public key of a database.
+ * @param db pointer to the package database to set the status for
+ * @param pinnedpubkey a pinned public key string
+ * @return 0 on success, or -1 on error
+ */
+int alpm_db_set_pinnedpubkey(alpm_db_t *db, char *pinnedpubkey);
 
 typedef enum _alpm_db_usage_ {
 	ALPM_DB_USAGE_SYNC = 1,

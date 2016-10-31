@@ -163,6 +163,9 @@ void config_repo_free(config_repo_t *repo)
 	if(repo == NULL) {
 		return;
 	}
+	if(repo->pinnedpubkey != NULL) {
+		free(repo->pinnedpubkey);
+	}
 	free(repo->name);
 	FREELIST(repo->servers);
 	free(repo);
@@ -204,7 +207,7 @@ static char *get_tempfile(const char *path, const char *filename)
 
 /** External fetch callback */
 static int download_with_xfercommand(const char *url, const char *localpath,
-		int force)
+		int force, const char *pinnedpubkey)
 {
 	int ret = 0, retval;
 	int usepart = 0;
@@ -232,6 +235,16 @@ static int download_with_xfercommand(const char *url, const char *localpath,
 	}
 
 	tempcmd = strdup(config->xfercommand);
+	/* replace all occurrences of %p with pinnedpubkey */
+	if(strstr(tempcmd, "%p")) {
+		if(pinnedpubkey == NULL) {
+			parsedcmd = strreplace(tempcmd, "%p", "");
+		} else {
+			parsedcmd = strreplace(tempcmd, "%p", pinnedpubkey);
+		}
+		free(tempcmd);
+		tempcmd = parsedcmd;
+	}
 	/* replace all occurrences of %o with fn.part */
 	if(strstr(tempcmd, "%o")) {
 		usepart = 1;
@@ -668,6 +681,8 @@ static int register_repo(config_repo_t *repo)
 			repo->name);
 	alpm_db_set_usage(db, repo->usage == 0 ? ALPM_DB_USAGE_ALL : repo->usage);
 
+	alpm_db_set_pinnedpubkey(db, repo->pinnedpubkey);
+
 	for(i = repo->servers; i; i = alpm_list_next(i)) {
 		char *value = i->data;
 		if(_add_mirror(db, value) != 0) {
@@ -915,12 +930,19 @@ static int _parse_repo(const char *key, char *value, const char *file,
 			}
 			FREELIST(values);
 		}
+	} else if(strcmp(key, "PinnedPubKey") == 0) {
+		if(!value) {
+			pm_printf(ALPM_LOG_ERROR, _("config file %s, line %d: directive '%s' needs a value\n"),
+					file, line, key);
+		} else {
+			repo->pinnedpubkey = strdup(value);
+			pm_printf(ALPM_LOG_DEBUG, "repo config: pinnedpubkey: %s\n", value);
+		}
 	} else {
 		pm_printf(ALPM_LOG_WARNING,
 				_("config file %s, line %d: directive '%s' in section '%s' not recognized.\n"),
 				file, line, key, repo->name);
 	}
-
 	return ret;
 }
 

@@ -306,6 +306,15 @@ alpm_list_t SYMEXPORT *alpm_db_search(alpm_db_t *db, const alpm_list_t *needles)
 	return _alpm_db_search(db, needles);
 }
 
+/** Sets the pinned public key for a repo */
+int SYMEXPORT alpm_db_set_pinnedpubkey(alpm_db_t *db, char *pinnedpubkey)
+{
+	ASSERT(db != NULL, return -1);
+	ASSERT(pinnedpubkey != NULL, return 0);
+	db->pinnedpubkey = strdup(pinnedpubkey);
+	return 0;
+}
+
 /** Sets the usage bitmask for a repo */
 int SYMEXPORT alpm_db_set_usage(alpm_db_t *db, int usage)
 {
@@ -351,6 +360,9 @@ void _alpm_db_free(alpm_db_t *db)
 	FREELIST(db->servers);
 	FREE(db->_path);
 	FREE(db->treename);
+	if(db->pinnedpubkey != NULL) {
+		FREE(db->pinnedpubkey);
+	}
 	FREE(db);
 
 	return;
